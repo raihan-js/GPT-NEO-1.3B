@@ -55,7 +55,7 @@ def chat():
     try:
         response = generator(
             prompt,
-            max_length=150,
+            max_length=1500,
             do_sample=True,
             temperature=0.7,
             top_p=0.9,
