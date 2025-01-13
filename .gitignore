@@ -1,0 +1,17 @@
+environment/
+data/
+
+# Model checkpoints and logs
+flask_app/models/*
+!flask_app/models/blackgpt/  # Keep the trained model if needed for deployment
+scripts/results/
+logs/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# System files
+.DS_Store
+.env

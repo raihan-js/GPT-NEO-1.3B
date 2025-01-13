@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GPT-NEO-1.3B-BGPT</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fira Code Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Boxicons for Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Custom scrollbar styling for the chat box */
+    #chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chat-box::-webkit-scrollbar-track {
+      background: #2d3748; /* Dark gray track */
+      border-radius: 4px;
+    }
+    #chat-box::-webkit-scrollbar-thumb {
+      background: #4a5568; /* Medium gray thumb */
+      border-radius: 4px;
+    }
+    #chat-box::-webkit-scrollbar-thumb:hover {
+      background: #718096; /* Lighter gray thumb on hover */
+    }
+  </style>
+</head>
+<body class="h-full text-white">
+  <div class="min-h-full flex flex-col items-center justify-center p-4">
+    <h1 class="text-3xl font-bold mb-4">GPT-NEO-1.3B-BGPT</h1>
+    <div id="chat-box" class="w-full max-w-xl bg-gray-800 p-4 rounded-md h-96 overflow-y-auto mb-4">
+      <!-- Chat messages will appear here -->
+    </div>
+    <div id="loading" class="text-gray-400 hidden mb-2"></div>
+    <div id="response-time" class="text-gray-400 text-sm mb-2"></div>
+    <div class="w-full max-w-xl flex space-x-2">
+      <input id="user-input" type="text" placeholder="Type your message..." 
+             class="flex-grow p-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none"
+      />
+      <button id="send-btn" 
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none flex items-center justify-center"
+      >
+        <i class="bx bx-send text-xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const loadingText = document.getElementById('loading');
+    const responseTimeText = document.getElementById('response-time');
+
+    let loadingInterval; // For live counter
+
+    const sendMessage = async () => {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      // Display user's message
+      chatBox.innerHTML += `<div class="mb-2"><span class="font-bold text-blue-400">You:</span> <span class="text-gray-100">${text}</span></div>`;
+      userInput.value = '';
+
+      // Initialize loading message and counter
+      let seconds = 0;
+      loadingText.textContent = "Generating response... (0s)";
+      loadingText.classList.remove('hidden');
+      loadingInterval = setInterval(() => {
+        seconds++;
+        loadingText.textContent = `Generating response... (${seconds}s)`;
+      }, 1000);
+
+      // Track response time
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input: text })
+        });
+        const data = await response.json();
+        const aiMessage = data.ai_response || data.error || 'Error retrieving response.';
+
+        // Calculate response time
+        const endTime = performance.now();
+        const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+
+        // Display AI's response and response time
+        chatBox.innerHTML += `<div class="mb-2"><span class="font-bold text-green-400">Neo:</span> <span class="text-white">${aiMessage}</span></div>`;
+        responseTimeText.textContent = `Response time: ${responseTime} seconds`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (error) {
+        chatBox.innerHTML += `<div class="mb-2"><span class="font-bold text-red-400">Neo:</span> Error: ${error}</div>`;
+      } finally {
+        // Stop loading counter and hide loading message
+        clearInterval(loadingInterval);
+        loadingText.classList.add('hidden');
+      }
+    };
+
+    // Send message when the send button is clicked
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Send message when the "Enter" key is pressed
+    userInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
