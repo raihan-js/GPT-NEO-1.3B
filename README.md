@@ -1,4 +1,4 @@
-# GPT-Neo Flask App (BGPT-Trained)
+# GPT-Neo Flask API
 
 This project integrates GPT-Neo 1.3B into a Flask application for generating AI-based responses. It includes training scripts and a pre-trained model.
 
